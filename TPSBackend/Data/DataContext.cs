@@ -19,26 +19,65 @@ public class DataContext: DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Atm>().HasKey(a => a.AtmId);
-        
-        modelBuilder.Entity<AtmTransaction>().HasKey(at => at.TransactionId);
-        modelBuilder.Entity<AtmTransaction>().HasOne(at => at.Atm);
-        modelBuilder.Entity<AtmTransaction>().HasOne(at => at.TransactedBy);
-        modelBuilder.Entity<AtmTransaction>().HasOne(at => at.UserTransaction);
-        
-        modelBuilder.Entity<User>().HasKey(u => u.UserId);
-        
-        modelBuilder.Entity<UserAccount>().HasKey(ua => ua.UserAccountId);
-        modelBuilder.Entity<UserAccount>().HasOne(ua => ua.User);
-        
-        modelBuilder.Entity<UserBalance>().HasKey(ub => ub.UserBalanceId);
-        modelBuilder.Entity<UserBalance>().HasOne(ub => ub.UserAccount);
-        
-        modelBuilder.Entity<UserTransaction>().HasKey(ut => ut.TransactionId);
-        modelBuilder.Entity<UserTransaction>().HasOne(ut => ut.User);
-        modelBuilder.Entity<UserTransaction>().HasOne(ut => ut.AccountFrom);
-        modelBuilder.Entity<UserTransaction>().HasOne(ut => ut.AccountTo);
-        modelBuilder.Entity<UserTransaction>().HasOne(ut => ut.TransactedBy);
-        
+        modelBuilder.Entity<Atm>()
+                .HasKey(a => a.AtmId);
+
+            modelBuilder.Entity<AtmTransaction>()
+                .HasKey(at => at.TransactionId);
+
+            modelBuilder.Entity<AtmTransaction>()
+                .HasOne(at => at.Atm)
+                .WithMany(a => a.AtmTransactions)
+                .HasForeignKey(at => at.AtmId);
+
+            modelBuilder.Entity<AtmTransaction>()
+                .HasOne(at => at.TransactedBy)
+                .WithMany(u => u.AtmTransactions)
+                .HasForeignKey(at => at.TransactedById);
+
+            modelBuilder.Entity<AtmTransaction>()
+                .HasOne(at => at.UserTransaction)
+                .WithMany(ut => ut.AtmTransactions)
+                .HasForeignKey(at => at.UserTransactionId)
+                .IsRequired(false);
+
+            modelBuilder.Entity<User>()
+                .HasKey(u => u.UserId);
+
+            modelBuilder.Entity<UserAccount>()
+                .HasKey(ua => ua.UserAccountId);
+
+            modelBuilder.Entity<UserAccount>()
+                .HasOne(ua => ua.User)
+                .WithMany(u => u.UserAccounts)
+                .HasForeignKey(ua => ua.UserId);
+
+            modelBuilder.Entity<UserBalance>()
+                .HasKey(ub => ub.UserBalanceId);
+
+            modelBuilder.Entity<UserBalance>()
+                .HasOne(ub => ub.UserAccount)
+                .WithOne(ua => ua.UserBalance)
+                .HasForeignKey<UserBalance>(ub => ub.UserAccountId);
+
+            modelBuilder.Entity<UserTransaction>()
+                .HasKey(ut => ut.TransactionId);
+
+            modelBuilder.Entity<UserTransaction>()
+                .HasOne(ut => ut.User)
+                .WithMany(u => u.UserTransactions)
+                .HasForeignKey(ut => ut.UserId);
+
+            modelBuilder.Entity<UserTransaction>()
+                .HasOne(ut => ut.AccountFrom)
+                .WithMany(ua => ua.UserTransactionsFrom)
+                .HasForeignKey(ut => ut.AccountFromId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<UserTransaction>()
+                .HasOne(ut => ut.AccountTo)
+                .WithMany(ua => ua.UserTransactionsTo)
+                .HasForeignKey(ut => ut.AccountToId)
+                .OnDelete(DeleteBehavior.NoAction);
     }
 }

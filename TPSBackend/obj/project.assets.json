@@ -3280,19 +3280,19 @@
     ]
   },
   "packageFolders": {
-    "/home/noble/.nuget/packages/": {}
+    "/home/jp/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/noble/RiderProjects/TSSSSSSST/tps-backend/TPSBackend/TPSBackend.csproj",
+      "projectUniqueName": "/home/jp/RiderProjects/TPSBackend/TPSBackend/TPSBackend.csproj",
       "projectName": "TPSBackend",
-      "projectPath": "/home/noble/RiderProjects/TSSSSSSST/tps-backend/TPSBackend/TPSBackend.csproj",
-      "packagesPath": "/home/noble/.nuget/packages/",
-      "outputPath": "/home/noble/RiderProjects/TSSSSSSST/tps-backend/TPSBackend/obj/",
+      "projectPath": "/home/jp/RiderProjects/TPSBackend/TPSBackend/TPSBackend.csproj",
+      "packagesPath": "/home/jp/.nuget/packages/",
+      "outputPath": "/home/jp/RiderProjects/TPSBackend/TPSBackend/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/noble/.nuget/NuGet/NuGet.Config"
+        "/home/jp/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net6.0"
@@ -3337,7 +3337,8 @@
           "net47",
           "net471",
           "net472",
-          "net48"
+          "net48",
+          "net481"
         ],
         "assetTargetFallback": true,
         "warn": true,
@@ -3349,7 +3350,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/6.0.127/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/home/jp/dotnet-sdk-6.0.418-linux-x64/sdk/6.0.418/RuntimeIdentifierGraph.json"
       }
     }
   }

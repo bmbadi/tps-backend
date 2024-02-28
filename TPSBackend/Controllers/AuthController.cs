@@ -4,6 +4,8 @@ using Microsoft.IdentityModel.Tokens;
 using TPSBackend.Dtos;
 using TPSBackend.Models;
 using TPSBackend.Repositories.Interfaces;
+using TPSBackend.Services;
+using TPSBackend.Services.Interfaces;
 using TPSBackend.Utils;
 
 namespace TPSBackend.Controllers;
@@ -12,11 +14,11 @@ namespace TPSBackend.Controllers;
 [Route("[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IUserService _userService;
 
-    public AuthController(IUserRepository userRepository)
+    public AuthController(IUserService userService)
     {
-        _userRepository = userRepository;
+        _userService = userService;
     }
 
     [HttpPost(Name = "Register")]
@@ -30,7 +32,7 @@ public class AuthController : ControllerBase
             return BadRequest(responseMessage);
         }
 
-        User? existingUser = _userRepository.GetUserByEmail(userCreateDto.Email!);
+        User? existingUser = _userService.GetUserByEmailAsync(userCreateDto.Email!).Result;
         if (existingUser != null)
         {
             ResponseMessage responseMessage = new ResponseMessage("User Exists", "A user with the submitted email address already exists. Kindly use a different email address or proceed to login.");
@@ -44,7 +46,7 @@ public class AuthController : ControllerBase
             Password = SecurePasswordHasher.Hash(userCreateDto.Password!)
         };
 
-        if (!_userRepository.CreateUser(userToCreate))
+        if (!_userService.CreateUserAsync(userToCreate).Result)
         {
             ResponseMessage responseMessage = new ResponseMessage("Server Error", "An error occurred while saving the user. Please retry later.");
             return StatusCode((int) HttpStatusCode.InternalServerError, responseMessage);
