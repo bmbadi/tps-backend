@@ -162,3 +162,17 @@
 /home/noble/RiderProjects/TSSSSSSST/tps-backend/TPSBackend/obj/Debug/net6.0/ref/TPSBackend.dll
 /home/noble/RiderProjects/TSSSSSSST/tps-backend/TPSBackend/obj/Debug/net6.0/TPSBackend.pdb
 /home/noble/RiderProjects/TSSSSSSST/tps-backend/TPSBackend/obj/Debug/net6.0/TPSBackend.genruntimeconfig.cache
+/home/jp/RiderProjects/TPSBackend/TPSBackend/bin/Debug/net6.0/Microsoft.Extensions.Configuration.Binder.dll
+/home/jp/RiderProjects/TPSBackend/TPSBackend/bin/Debug/net6.0/Microsoft.Extensions.Diagnostics.Abstractions.dll
+/home/jp/RiderProjects/TPSBackend/TPSBackend/bin/Debug/net6.0/Microsoft.Extensions.FileProviders.Abstractions.dll
+/home/jp/RiderProjects/TPSBackend/TPSBackend/bin/Debug/net6.0/Microsoft.Extensions.Hosting.Abstractions.dll
+/home/jp/RiderProjects/TPSBackend/TPSBackend/bin/Debug/net6.0/Serilog.dll
+/home/jp/RiderProjects/TPSBackend/TPSBackend/bin/Debug/net6.0/Serilog.AspNetCore.dll
+/home/jp/RiderProjects/TPSBackend/TPSBackend/bin/Debug/net6.0/Serilog.Extensions.Hosting.dll
+/home/jp/RiderProjects/TPSBackend/TPSBackend/bin/Debug/net6.0/Serilog.Extensions.Logging.dll
+/home/jp/RiderProjects/TPSBackend/TPSBackend/bin/Debug/net6.0/Serilog.Formatting.Compact.dll
+/home/jp/RiderProjects/TPSBackend/TPSBackend/bin/Debug/net6.0/Serilog.Settings.Configuration.dll
+/home/jp/RiderProjects/TPSBackend/TPSBackend/bin/Debug/net6.0/Serilog.Sinks.Console.dll
+/home/jp/RiderProjects/TPSBackend/TPSBackend/bin/Debug/net6.0/Serilog.Sinks.Debug.dll
+/home/jp/RiderProjects/TPSBackend/TPSBackend/bin/Debug/net6.0/Serilog.Sinks.File.dll
+/home/jp/RiderProjects/TPSBackend/TPSBackend/bin/Debug/net6.0/System.Diagnostics.DiagnosticSource.dll

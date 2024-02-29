@@ -2,5 +2,5 @@ namespace TPSBackend.Enums;
 
 public enum TransactionType
 {
-    Withdraw, Deposit
+    Withdraw, Deposit, Transfer
 }

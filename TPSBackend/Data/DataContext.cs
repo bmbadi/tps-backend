@@ -14,7 +14,6 @@ public class DataContext: DbContext
     public DbSet<AtmTransaction> AtmTransactions { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<UserAccount> UserAccounts { get; set; }
-    public DbSet<UserBalance> UserBalances { get; set; }
     public DbSet<UserTransaction> UserTransactions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -51,14 +50,6 @@ public class DataContext: DbContext
                 .HasOne(ua => ua.User)
                 .WithMany(u => u.UserAccounts)
                 .HasForeignKey(ua => ua.UserId);
-
-            modelBuilder.Entity<UserBalance>()
-                .HasKey(ub => ub.UserBalanceId);
-
-            modelBuilder.Entity<UserBalance>()
-                .HasOne(ub => ub.UserAccount)
-                .WithOne(ua => ua.UserBalance)
-                .HasForeignKey<UserBalance>(ub => ub.UserAccountId);
 
             modelBuilder.Entity<UserTransaction>()
                 .HasKey(ut => ut.TransactionId);
