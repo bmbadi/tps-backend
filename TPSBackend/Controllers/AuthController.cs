@@ -22,10 +22,11 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost(Name = "Register")]
-    public IActionResult CreateUser([FromBody] UserCreateDto? userCreateDto)
+    [Route("register")]
+    public IActionResult CreateUser([FromBody] UserCreateDto userCreateDto)
     {
         //todo check if is valid email
-        if (userCreateDto == null || userCreateDto.Name.IsNullOrEmpty()  || userCreateDto.Email.IsNullOrEmpty() 
+        if (userCreateDto.Name.IsNullOrEmpty() || userCreateDto.Email.IsNullOrEmpty() 
             || userCreateDto.Password.IsNullOrEmpty())
         {
             ResponseMessage responseMessage = new ResponseMessage("Incomplete Data", "Kindly submit all the required data");
@@ -55,5 +56,33 @@ public class AuthController : ControllerBase
         //todo return user object, with JWT
         ResponseMessage responseMessageSuccess = new ResponseMessage("Success", "User created successfully");
         return StatusCode((int) HttpStatusCode.Created, responseMessageSuccess);
+    }
+
+    [HttpPost(Name = "Login")]
+    [Route("login")]
+    public IActionResult LoginUser(UserLoginDto userLoginDto)
+    {
+        //todo check if is valid email
+        if (userLoginDto.Email.IsNullOrEmpty() || userLoginDto.Password.IsNullOrEmpty())
+        {
+            ResponseMessage responseMessage = new ResponseMessage("Incomplete Data", "Kindly submit all the required data");
+            return BadRequest(responseMessage);
+        }
+        
+        User? existingUser = _userService.GetUserByEmailAsync(userLoginDto.Email!).Result;
+        if (existingUser == null)
+        {
+            ResponseMessage responseMessage = new ResponseMessage("Invalid Credentials", "Invalid email or password");
+            return BadRequest(responseMessage);
+        }
+
+        if (!SecurePasswordHasher.Verify(userLoginDto.Password!, existingUser.Password))
+        {
+            ResponseMessage responseMessage = new ResponseMessage("Invalid Credentials", "Invalid email or password");
+            return BadRequest(responseMessage);
+        }
+
+        UserDto userDto = _userService.GetUserDtoFromUser(existingUser);
+        return Ok(userDto);
     }
 }

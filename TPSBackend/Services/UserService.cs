@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TPSBackend.Data;
+using TPSBackend.Dtos;
 using TPSBackend.Models;
 using TPSBackend.Services.Interfaces;
 
@@ -24,5 +25,10 @@ public class UserService : IUserService
     public async Task<User?> GetUserByEmailAsync(string email)
     {
         return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+    }
+
+    public UserDto GetUserDtoFromUser(User user)
+    {
+        return new UserDto(user.Name, user.Email);
     }
 }
