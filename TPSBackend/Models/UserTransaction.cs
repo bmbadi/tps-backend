@@ -9,8 +9,8 @@ public class UserTransaction
     public long UserId { get; set; }
     public TransactionType TransactionType { get; set; }
     public double Amount { get; set; }
-    public UserAccount AccountFrom { get; set; }
-    public long AccountFromId { get; set; }
+    public UserAccount? AccountFrom { get; set; } //null for Account deposit
+    public long? AccountFromId { get; set; } //null for Account deposit
     public UserAccount? AccountTo { get; set; } //null for ATM withdrawal
     public long? AccountToId { get; set; } //null for ATM withdrawal
     public double BalanceBefore { get; set; }

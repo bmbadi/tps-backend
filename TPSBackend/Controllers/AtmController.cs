@@ -328,7 +328,13 @@ public class AtmController : ControllerBase
                 return Unauthorized(responseMessage);
             }
 
-            Atm atm = _atmService.GetAtmById(atmId).Result;
+            Atm? atm = _atmService.GetAtmById(atmId).Result;
+
+            if (atm == null)
+            {
+                ResponseMessage responseMessage = new ResponseMessage("Invalid ATM ID", "No ATM found with the submitted id (" + atmId + ")");
+                return BadRequest(responseMessage);
+            }
             return Ok(_atmService.AtmToAtmDto(atm));
         }
         catch (Exception e)

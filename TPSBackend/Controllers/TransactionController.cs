@@ -122,4 +122,76 @@ public class TransactionController : ControllerBase
             return StatusCode((int) HttpStatusCode.InternalServerError, responseMessage);
         }
     }
+
+    [HttpPost("admin/deposit")]
+    public IActionResult AdminDepositFunds([FromBody] FundsDepositRequestDto dto)
+    {
+        try
+        {
+            string token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            User? loggedInUser = _userService.GetUserFromToken(token);
+            if (loggedInUser == null || loggedInUser.UserRole != UserRole.Admin)
+            {
+                ResponseMessage responseMessage = new ResponseMessage("Unauthorized", "Unauthorized");
+                return Unauthorized(responseMessage);
+            }
+            
+            if (dto.Amount == null || dto.AccountNumber == null)
+            {
+                ResponseMessage responseMessage = new ResponseMessage("Incomplete Data", "Kindly submit all the required data");
+                return BadRequest(responseMessage);
+            }
+            
+            if (dto.Amount <= 0)
+            {
+                ResponseMessage responseMessage = new ResponseMessage("Invalid Amount", "You can only deposit funds greater than 0");
+                return BadRequest(responseMessage);
+            }
+            
+            double amtToDeposit = (double) dto.Amount;
+            UserAccount? userAccount = _userAccountService.GetUserAccountByAccountNumber((long) dto.AccountNumber).Result;
+            if (userAccount == null)
+            {
+                ResponseMessage responseMessage = new ResponseMessage("Invalid Account Number", "No account found with the submitted account number: " + dto.AccountNumber);
+                return BadRequest(responseMessage);
+            }
+            
+            double userAccountBalanceBefore = userAccount.Balance;
+            double userAccountBalanceAfter = userAccount.Balance + amtToDeposit;
+            
+            userAccount.Balance = userAccountBalanceAfter;
+            
+            UserTransaction userTransaction = new UserTransaction
+            {
+                UserId = loggedInUser.UserId,
+                TransactionType = TransactionType.Deposit,
+                Amount = amtToDeposit,
+                AccountFromId = null,
+                AccountToId = userAccount.UserAccountId,
+                BalanceBefore = userAccountBalanceBefore,
+                BalanceAfter = userAccountBalanceAfter,
+                TransactedAt = DateTime.Now
+            };
+            
+            bool a = _transactionService.SaveAdminDepositFundsRecords(userAccount, userTransaction).Result;
+
+            if (a)
+            {
+                ResponseMessage responseMessage = new ResponseMessage("Success", "Funds deposited to the user account successfully");
+                return Ok(responseMessage);
+            }
+            else
+            {
+                ResponseMessage responseMessage = new ResponseMessage("Fail", "An error occurred while depositing the funds. Please try again later");
+                return StatusCode((int) HttpStatusCode.InternalServerError, responseMessage); 
+            }
+        }
+        catch (Exception e)
+        {
+            string errorMessage = "An error occurred while depositing the funds. Please retry later.";
+            Log.Error(e, errorMessage);
+            ResponseMessage responseMessage = new ResponseMessage("Server Error", errorMessage);
+            return StatusCode((int) HttpStatusCode.InternalServerError, responseMessage);
+        }
+    }
 }

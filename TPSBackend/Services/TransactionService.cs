@@ -46,4 +46,34 @@ public class TransactionService : ITransactionService
             }
         }
     }
+
+    public async Task<bool> SaveAdminDepositFundsRecords(UserAccount userAccount, UserTransaction userTransaction)
+    {
+        using (var ts = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+        {
+            try
+            {
+                _context.UserTransactions.Add(userTransaction);
+                _context.UserAccounts.Update(userAccount);
+                    
+                int res = await _context.SaveChangesAsync();
+                if (res == 2)
+                {
+                    ts.Complete();
+                }
+                else
+                {
+                    throw new Exception("An error occurred while SaveAdminDepositFundsRecords: res = " + res);
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Error saving account fund deposit - disposing");
+                ts.Dispose();
+                return false;
+            }
+        }
+    }
 }
