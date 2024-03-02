@@ -11,8 +11,8 @@ public class UserTransaction
     public double Amount { get; set; }
     public UserAccount AccountFrom { get; set; }
     public long AccountFromId { get; set; }
-    public UserAccount AccountTo { get; set; }
-    public long AccountToId { get; set; }
+    public UserAccount? AccountTo { get; set; } //null for ATM withdrawal
+    public long? AccountToId { get; set; } //null for ATM withdrawal
     public double BalanceBefore { get; set; }
     public double BalanceAfter { get; set; }
     public DateTime TransactedAt { get; set; }

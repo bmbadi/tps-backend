@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using TPSBackend.Dtos;
+using TPSBackend.Enums;
 using TPSBackend.Models;
 using TPSBackend.Repositories.Interfaces;
 using TPSBackend.Services;
@@ -31,7 +32,7 @@ public class AuthController : ControllerBase
         {
             //todo check if is valid email
             if (userCreateDto.Name.IsNullOrEmpty() || userCreateDto.Email.IsNullOrEmpty() 
-                || userCreateDto.Password.IsNullOrEmpty())
+                || userCreateDto.Password.IsNullOrEmpty() || userCreateDto.UserRole == null)
             {
                 ResponseMessage responseMessage = new ResponseMessage("Incomplete Data", "Kindly submit all the required data");
                 return BadRequest(responseMessage);
@@ -48,7 +49,8 @@ public class AuthController : ControllerBase
             {
                 Name = userCreateDto.Name!,
                 Email = userCreateDto.Email!,
-                Password = SecurePasswordHasher.Hash(userCreateDto.Password!)
+                Password = SecurePasswordHasher.Hash(userCreateDto.Password!),
+                UserRole = (UserRole) userCreateDto.UserRole
             };
 
             if (!_userService.CreateUserAsync(userToCreate).Result)

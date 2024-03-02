@@ -14,4 +14,6 @@ public class AtmTransaction
     public DateTime TransactedAt { get; set; }
     public UserTransaction? UserTransaction { get; set; } //for withdrawals from a user account
     public long? UserTransactionId { get; set; } //for withdrawals from a user account
+    public double BalanceBefore { get; set; }
+    public double BalanceAfter { get; set; }
 }
