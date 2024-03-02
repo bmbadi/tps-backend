@@ -1,5 +1,5 @@
 using System.Net;
-using Microsoft.AspNetCore.Authorization;
+using System.Transactions;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using TPSBackend.Dtos;
@@ -24,7 +24,7 @@ public class TransactionController : ControllerBase
         _userService = userService;
     }
     
-    [HttpPost("transfer"), Authorize]
+    [HttpPost("transfer")]
     public IActionResult TransferFunds([FromBody] FundTransferRequestDto dto)
     {
         try
@@ -37,7 +37,7 @@ public class TransactionController : ControllerBase
                 return Unauthorized(responseMessage);
             }
             
-            if (dto.Amount == null || dto.AccountFrom == null || dto.AccountTo == null)
+            if (dto.Amount == null || dto.AccountFrom == null || dto.AccountTo == null || dto.AccountFrom == dto.AccountTo)
             {
                 ResponseMessage responseMessage = new ResponseMessage("Incomplete Data", "Kindly submit all the required data");
                 return BadRequest(responseMessage);
@@ -63,7 +63,7 @@ public class TransactionController : ControllerBase
                 return BadRequest(responseMessage);
             }
 
-            if (accountFrom.Balance >= dto.Amount)
+            if (accountFrom.Balance < dto.Amount)
             {
                 ResponseMessage responseMessage = new ResponseMessage("Insufficient Balance", "Sorry, you do not have adequate funds to complete the transfer of funds.");
                 return BadRequest(responseMessage);
@@ -83,28 +83,27 @@ public class TransactionController : ControllerBase
                 AccountToId = accountTo.UserAccountId,
                 BalanceBefore = balanceBeforeFrom,
                 BalanceAfter = balanceAfterFrom,
-                TransactedAt = new DateTime()
+                TransactedAt = DateTime.Now
             };
             
             UserTransaction userTransactionTo = new UserTransaction
             {
-                UserId = accountTo.UserId,
+                UserId = loggedInUser.UserId,
                 TransactionType = TransactionType.Transfer,
                 Amount = (double) dto.Amount,
                 AccountFromId = accountFrom.UserAccountId,
                 AccountToId = accountTo.UserAccountId,
                 BalanceBefore = balanceBeforeTo,
                 BalanceAfter = balanceAfterTo,
-                TransactedAt = new DateTime()
+                TransactedAt = DateTime.Now
             };
 
             accountFrom.Balance = balanceAfterFrom;
             accountTo.Balance = balanceAfterTo;
+            
+            bool a = _transactionService.SaveFundsTransferRecords(userTransactionFrom, userTransactionTo, accountFrom, accountTo).Result;
 
-            if (_transactionService.SaveUserTransaction(userTransactionFrom).Result &&
-                _transactionService.SaveUserTransaction(userTransactionTo).Result &&
-                _userAccountService.SaveUserAccount(accountFrom).Result &&
-                _userAccountService.SaveUserAccount(accountTo).Result)
+            if (a)
             {
                 ResponseMessage responseMessage = new ResponseMessage("Success", "Funds transferred successfully");
                 return Ok(responseMessage);
@@ -117,7 +116,7 @@ public class TransactionController : ControllerBase
         }
         catch (Exception e)
         {
-            string errorMessage = "An error occurred while logging in. Please retry later.";
+            string errorMessage = "An error occurred while transferring funds. Please retry later.";
             Log.Error(e, errorMessage);
             ResponseMessage responseMessage = new ResponseMessage("Server Error", errorMessage);
             return StatusCode((int) HttpStatusCode.InternalServerError, responseMessage);

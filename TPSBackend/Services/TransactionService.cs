@@ -1,3 +1,5 @@
+using System.Transactions;
+using Serilog;
 using TPSBackend.Data;
 using TPSBackend.Models;
 using TPSBackend.Services.Interfaces;
@@ -13,10 +15,35 @@ public class TransactionService : ITransactionService
         _context = context;
     }
 
-    public async Task<bool> SaveUserTransaction(UserTransaction userTransaction)
+    public async Task<bool> SaveFundsTransferRecords(UserTransaction userTransactionFrom, UserTransaction  userTransactionTo, UserAccount accountFrom, UserAccount accountTo)
     {
-        _context.UserTransactions.Add(userTransaction);
-        int res = await _context.SaveChangesAsync();
-        return res == 1;
+        using (var ts = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+        {
+            try
+            {
+                _context.UserTransactions.Add(userTransactionFrom);
+                _context.UserTransactions.Add(userTransactionTo);
+                _context.UserAccounts.Update(accountFrom);
+                _context.UserAccounts.Update(accountTo);
+                    
+                int res = await _context.SaveChangesAsync();
+                if (res == 4)
+                {
+                    ts.Complete();
+                }
+                else
+                {
+                    throw new Exception("An error occurred while SaveFundsTransferRecords: res = " + res);
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Error saving fund transfer - disposing");
+                ts.Dispose();
+                return false;
+            }
+        }
     }
 }

@@ -4,5 +4,5 @@ namespace TPSBackend.Services.Interfaces;
 
 public interface ITransactionService
 {
-    Task<bool> SaveUserTransaction(UserTransaction userTransaction);
+    Task<bool> SaveFundsTransferRecords(UserTransaction userTransactionFrom, UserTransaction  userTransactionTo, UserAccount accountFrom, UserAccount accountTo);
 }
