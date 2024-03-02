@@ -12,18 +12,19 @@ using TPSBackend.Utils;
 namespace TPSBackend.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/auth")]
 public class AuthController : ControllerBase
 {
     private readonly IUserService _userService;
+    private readonly IUserAccountService _userAccountService;
 
-    public AuthController(IUserService userService)
+    public AuthController(IUserService userService, IUserAccountService userAccountService)
     {
         _userService = userService;
+        _userAccountService = userAccountService;
     }
 
-    [HttpPost(Name = "Register")]
-    [Route("Register")]
+    [HttpPost("register")]
     public IActionResult CreateUser([FromBody] UserCreateDto userCreateDto)
     {
         try
@@ -56,6 +57,8 @@ public class AuthController : ControllerBase
                 return StatusCode((int) HttpStatusCode.InternalServerError, responseMessage);
             }
             
+            _userAccountService.CreateNewUserAccount(userToCreate);
+            
             UserDto userDto = _userService.GetUserDtoFromUser(userToCreate);
             return StatusCode((int) HttpStatusCode.Created, userDto);
         }
@@ -69,8 +72,7 @@ public class AuthController : ControllerBase
 
     }
 
-    [HttpPost(Name = "Login")]
-    [Route("Login")]
+    [HttpPost("login")]
     public IActionResult LoginUser(UserLoginDto userLoginDto)
     {
         try

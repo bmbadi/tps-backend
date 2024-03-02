@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using TPSBackend.Data;
 using TPSBackend.Dtos;
 using TPSBackend.Models;
@@ -40,7 +41,8 @@ public class UserService : IUserService
     
     public string CreateJwtToken(User user)
     {
-        DateTime expiry = DateTime.Now.AddHours(3);
+        DateTime createdAt = DateTime.Now;
+        DateTime expiry = createdAt.AddHours(4);
         var claims = new List<Claim>
         {
             new(ClaimTypes.Name, user.Name),
@@ -50,22 +52,37 @@ public class UserService : IUserService
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         
-        var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
+        var jsonToken = new JwtSecurityToken(
             claims: claims,
+            notBefore: createdAt,
             expires: expiry,
             signingCredentials: credentials);
+        
+        Log.Information("Created JWT valid to: " + jsonToken.ValidTo + " valid from: " + jsonToken.ValidFrom);
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return new JwtSecurityTokenHandler().WriteToken(jsonToken);
     }
 
-    public Task<User> GetUserFromToken(string token)
+    public User? GetUserFromToken(string token)
     {
-        var handler = new JwtSecurityTokenHandler();
-        var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
-        string email = jsonToken!.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value!;
+        try
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+            if (jsonToken!.ValidTo < DateTime.Now)
+            {
+                throw new SecurityTokenExpiredException("Expired JWT valid to: " + jsonToken.ValidTo + " valid from: " + jsonToken.ValidFrom + " issued at: " + jsonToken.IssuedAt);
+            }
+        
+            string email = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value!;
 
-        return GetUserByEmailAsync(email)!;
+            return GetUserByEmailAsync(email).Result;
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "JWT Error");
+            return null;
+        }
+        
     }
 }

@@ -42,6 +42,10 @@ public class DataContext: DbContext
 
             modelBuilder.Entity<User>()
                 .HasKey(u => u.UserId);
+            
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique(); 
 
             modelBuilder.Entity<UserAccount>()
                 .HasKey(ua => ua.UserAccountId);
@@ -50,6 +54,10 @@ public class DataContext: DbContext
                 .HasOne(ua => ua.User)
                 .WithMany(u => u.UserAccounts)
                 .HasForeignKey(ua => ua.UserId);
+            
+            modelBuilder.Entity<UserAccount>()
+                .HasIndex(e => e.AccountNumber)
+                .IsUnique(); 
 
             modelBuilder.Entity<UserTransaction>()
                 .HasKey(ut => ut.TransactionId);

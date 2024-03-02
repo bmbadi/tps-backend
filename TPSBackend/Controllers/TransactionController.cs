@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using TPSBackend.Dtos;
@@ -9,7 +10,7 @@ using TPSBackend.Services.Interfaces;
 namespace TPSBackend.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/transaction")]
 public class TransactionController : ControllerBase
 {
     private readonly IUserAccountService _userAccountService;
@@ -23,13 +24,13 @@ public class TransactionController : ControllerBase
         _userService = userService;
     }
     
-    [HttpPost(Name = "Transfer Funds")]
-    [Route("transfer")]
+    [HttpPost("transfer"), Authorize]
     public IActionResult TransferFunds([FromBody] FundTransferRequestDto dto)
     {
         try
         {
-            User? loggedInUser = GetLoggedInUser();
+            string token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            User? loggedInUser = _userService.GetUserFromToken(token);
             if (loggedInUser == null)
             {
                 ResponseMessage responseMessage = new ResponseMessage("Unauthorized", "Unauthorized");
@@ -42,14 +43,14 @@ public class TransactionController : ControllerBase
                 return BadRequest(responseMessage);
             }
 
-            UserAccount? accountFrom = _userAccountService.GetUserAccountByAccountNumberAndUser(dto.AccountFrom, loggedInUser.UserId).Result;
+            UserAccount? accountFrom = _userAccountService.GetUserAccountByAccountNumberAndUser((long) dto.AccountFrom, loggedInUser.UserId).Result;
             if (accountFrom == null)
             {
                 ResponseMessage responseMessage = new ResponseMessage("Invalid Account From", "The submitted account from is invalid");
                 return BadRequest(responseMessage);
             }
             
-            UserAccount? accountTo = _userAccountService.GetUserAccountByAccountNumber(dto.AccountTo).Result;
+            UserAccount? accountTo = _userAccountService.GetUserAccountByAccountNumber((long) dto.AccountTo).Result;
             if (accountTo == null)
             {
                 ResponseMessage responseMessage = new ResponseMessage("Invalid Account To", "The submitted account to is invalid");
@@ -120,19 +121,6 @@ public class TransactionController : ControllerBase
             Log.Error(e, errorMessage);
             ResponseMessage responseMessage = new ResponseMessage("Server Error", errorMessage);
             return StatusCode((int) HttpStatusCode.InternalServerError, responseMessage);
-        }
-    }
-
-    private User? GetLoggedInUser()
-    {
-        try
-        {
-            string token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-            return _userService.GetUserFromToken(token).Result;
-        }
-        catch (Exception e)
-        {
-            return null;
         }
     }
 }
